@@ -4,8 +4,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "BotOps"
-version = "0.1rc1"
-description = "Bot & related Operations."
+version = "0.1a1"
+description = "Telegram bot framework with related operations."
 authors = ["Kirill Lapushinskiy <kirill@lapushinskiy.ru>"]
 readme = "README.md"
 packages = [{ include = "botops" }]
@@ -90,6 +90,13 @@ select = [
     # isort
     "I",
 ]
+extend-select = [
+    # flake8-bugbear
+    "B",
+    # flake8-quotes
+    "Q"
+]
+fixable = ["ALL"]
 
 [tool.mypy]
 python_version = "3.12"
