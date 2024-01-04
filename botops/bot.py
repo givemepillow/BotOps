@@ -4,6 +4,8 @@ from botops import telegram
 from botops.core import BotEngine, Dispatcher
 from botops.utils import Cleanup
 
+__all__ = ["Bot"]
+
 
 class Bot(Cleanup):
     def __init__(self, token: str, dispatcher: Dispatcher):

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "BotOps"
-version = "0.1a1"
+version = "0.1a2"
 description = "Telegram bot framework with related operations."
 authors = ["Kirill Lapushinskiy <kirill@lapushinskiy.ru>"]
 readme = "README.md"
