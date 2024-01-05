@@ -1,16 +1,15 @@
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
+[project]
 name = "BotOps"
-version = "0.1a2"
+dynamic = ["version"]
+requires-python = ">=3.12"
 description = "Telegram bot framework with related operations."
-authors = ["Kirill Lapushinskiy <kirill@lapushinskiy.ru>"]
+authors = [
+    {name = "Kirill Lapushinskiy", email = "kirill@lapushinskiy.ru"},
+]
 readme = "README.md"
 packages = [{ include = "botops" }]
 include = ["README.md", "CHANGELOG.md"]
-license = "MIT"
+license = {text = "MIT"}
 repository = "https://github.com/givemepillow/BotOps"
 keywords = ["bot", "telegram", "chatbot", "asyncio"]
 classifiers = [
@@ -21,23 +20,32 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Communications :: Chat",
 ]
+dependencies = [
+    "aiohttp>=3.9.1",
+    "attrs>=23.2.0",
+    "cattrs>=23.2.3",
+]
 
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/givemepillow/BotOps/issues"
+[project.urls]
+Documentation = "https://github.com/givemepillow/BotOps#readme"
+Issues = "https://github.com/givemepillow/BotOps/issues"
+Source = "https://github.com/givemepillow/BotOps"
 
-[tool.poetry.dependencies]
-python = "^3.12"
-aiohttp = "^3.9.1"
-attrs = "^23.2.0"
-cattrs = "^23.2.3"
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.1.11"
-mypy = "^1.8.0"
+[tool.pdm]
+package-type = "library"
+
+[tool.pdm.version]
+source = "scm"
 
 [tool.ruff]
 exclude = [
@@ -67,7 +75,6 @@ target-version = "py312"
 line-length = 100
 extend-ignore = ["F403"]
 fixable = ["I001"]
-
 
 [tool.ruff.format]
 quote-style = "double"
