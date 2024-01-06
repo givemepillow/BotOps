@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import asyncio
-import typing
+from collections.abc import Callable
 from logging import getLogger
+from typing import TYPE_CHECKING
 
-from botops import Handler
-from botops.telegram import Update
-
-if typing.TYPE_CHECKING:
-    from botops.bot import Bot
+if TYPE_CHECKING:
+    from botops.core import Bot, Handler
+    from botops.telegram import Update
 
 
 class Dispatcher:
@@ -19,7 +18,7 @@ class Dispatcher:
     def register(self, *handlers: type[Handler]) -> None:
         self.handlers.extend(handler() for handler in handlers)
 
-    async def dispatch(self, bot: Bot, update: Update, done_callback: typing.Callable) -> None:
+    async def dispatch(self, bot: Bot, update: Update, done_callback: Callable) -> None:
         for handler in reversed(self.handlers):
             concrete_update = getattr(update, handler.__update_type__)
             if concrete_update is None:

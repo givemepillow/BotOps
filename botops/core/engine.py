@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import Queue
+from asyncio import Lock, Queue, Task
 from collections.abc import AsyncIterator, Awaitable, Callable
 from logging import getLogger
 from typing import Any, Literal, TypeVar, Unpack
@@ -16,7 +16,7 @@ _R = TypeVar("_R")
 class BotEngine(Cleanup):
     def __init__(self, token: str) -> None:
         self._client = APIClient()
-        self._lock = asyncio.Lock()
+        self._lock = Lock()
         self._is_running = False
         self._worker_task: Awaitable | None = None
         self._url = f"/bot{token}"
@@ -77,7 +77,7 @@ class BotEngine(Cleanup):
 
     @property
     def updates(self) -> AsyncIterator:
-        def _done_callback(task: asyncio.Task | None = None) -> None:
+        def _done_callback(task: Task | None = None) -> None:
             self._updates.task_done()
 
             if task is None:
@@ -90,9 +90,7 @@ class BotEngine(Cleanup):
             else:
                 self._logger.info(f"Task {task.get_name()} successfully finished!")
 
-        async def _async_iter() -> (
-            AsyncIterator[tuple[dict, Callable[[asyncio.Task | None], None]]]
-        ):
+        async def _async_iter() -> AsyncIterator[tuple[dict, Callable[[Task | None], None]]]:
             while update := await self._updates.get():
                 yield update, _done_callback
 
