@@ -1,2 +1,1 @@
-from botops.bot import *
-from botops.handler import *
+from botops.core import *
