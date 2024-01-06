@@ -73,7 +73,6 @@ exclude = [
 ]
 target-version = "py312"
 line-length = 100
-extend-ignore = ["F403"]
 fixable = ["I001"]
 
 [tool.ruff.format]

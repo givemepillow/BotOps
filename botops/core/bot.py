@@ -1,15 +1,18 @@
-from typing import Unpack
+from __future__ import annotations
 
-from botops import telegram
-from botops.core import BotEngine, Dispatcher
-from botops.utils import Cleanup
+from typing import TYPE_CHECKING, Unpack
+
+from botops import core, telegram, utils
+
+if TYPE_CHECKING:
+    from botops import Dispatcher
 
 __all__ = ["Bot"]
 
 
-class Bot(Cleanup):
+class Bot(utils.Cleanup):
     def __init__(self, token: str, dispatcher: Dispatcher):
-        self._engine = BotEngine(token)
+        self._engine = core.BotEngine(token)
         self._dispatcher = dispatcher
 
     async def run(self) -> None:
