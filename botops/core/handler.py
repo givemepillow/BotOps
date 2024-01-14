@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-import typing
 from abc import ABC, abstractmethod
-from typing import Generic, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 from botops import telegram
 
-if typing.TYPE_CHECKING:
-    from botops import Bot
+if TYPE_CHECKING:
+    from .bot import Bot
 
 __all__ = ["Handler", "MessageHandler", "EditedMessageHandler"]
 
-U = typing.TypeVar(
+U = TypeVar(
     "U",
     telegram.Message,
     telegram.CallbackQuery,
@@ -32,8 +31,8 @@ class Handler(ABC, Generic[U]):
         propagation: bool = False
 
     @final
-    def __init__(self) -> None:
-        self.bot: Bot | None = None
+    def __init__(self, bot: Bot) -> None:
+        self.bot = bot
         self.update: U | None = None
 
         if self.Meta is not self.__class__.Meta:
@@ -44,10 +43,17 @@ class Handler(ABC, Generic[U]):
             self.Meta = _Meta
 
     @final
-    async def __call__(self, bot: Bot, update: U) -> None:
-        self.bot = bot
+    async def __call__(self, update: U) -> None:
         self.update = update
         await self.handle()
+
+    @property
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    @property
+    def update_type(self) -> telegram.UpdateType:
+        return self.__update_type__
 
     @abstractmethod
     async def handle(self) -> None:

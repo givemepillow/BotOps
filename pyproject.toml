@@ -30,6 +30,7 @@ dependencies = [
     "aiohttp>=3.9.1",
     "attrs>=23.2.0",
     "cattrs>=23.2.3",
+    "apscheduler>=3.10.4",
 ]
 
 [project.urls]
@@ -47,6 +48,11 @@ package-type = "library"
 [tool.pdm.version]
 source = "scm"
 
+[tool.pdm.dev-dependencies]
+lint = [
+    "ruff>=0.1.13",
+    "mypy>=1.8.0",
+]
 [tool.ruff]
 exclude = [
     ".bzr",
@@ -73,7 +79,7 @@ exclude = [
 ]
 target-version = "py312"
 line-length = 100
-fixable = ["I001"]
+fixable = ["I001", "F541", "F401"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -108,5 +114,5 @@ fixable = ["ALL"]
 python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
-disable_error_code = ["union-attr", "name-defined", "misc"]
+disable_error_code = ["union-attr", "name-defined", "misc", "import-untyped"]
 disallow_untyped_defs = true
