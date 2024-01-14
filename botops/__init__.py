@@ -1,3 +1,3 @@
-from botops.core import Bot, Dispatcher, EditedMessageHandler, MessageHandler
+from botops.core import Bot, EditedMessageHandler, MessageHandler
 
-__all__ = ["Bot", "Dispatcher", "MessageHandler", "EditedMessageHandler"]
+__all__ = ["Bot", "MessageHandler", "EditedMessageHandler"]

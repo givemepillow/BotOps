@@ -1,46 +1,54 @@
 from dataclasses import dataclass, field
-from http.client import HTTPException
-from typing import Any, Literal, Self
+from logging import getLogger
+from typing import Any, Literal
 
 import aiohttp
 
-__all__ = ["APIClient"]
+__all__ = ["APIClient", "Response"]
+
+from botops.utils import Cleanup
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class _Response:
+class Response:
     ok: bool = field()
     result: list[dict] | dict | bool | None = field(default=None)
-    error_code: str | None = field(default=None)
+    error_code: int | None = field(default=None)
     description: str | None = field(default=None)
+    parameters: dict | None = field(default=None)
 
 
-class APIClient:
+class APIClient(Cleanup):
     def __init__(self) -> None:
-        self.session = aiohttp.ClientSession("https://api.telegram.org")
+        self._session = aiohttp.ClientSession("https://api.telegram.org")
+        self._logger = getLogger(__name__)
 
-    async def setup(self) -> Self:
-        return self
+    async def _on_startup(self) -> None:
+        pass
 
-    async def shutdown(self) -> None:
-        await self.session.close()
+    async def _on_shutdown(self) -> None:
+        self._logger.warning("Closing http session...")
+        await self._session.close()
 
-    async def request(
-        self, method: Literal["POST", "GET"], path: str, /, **attrs: Any
-    ) -> _Response:
+    async def request(self, method: Literal["POST", "GET"], path: str, /, **attrs: Any) -> Response:
+        if method == "GET":
+            request = self._session.request(method, path, params=self._clear_attrs(attrs))
+        else:
+            request = self._session.request(method, path, json=self._clear_attrs(attrs))
+
+        async with request as response:
+            try:
+                raw_data = await response.json()
+                return Response(**raw_data)
+            except Exception as exc:
+                self._logger.error(
+                    f"Response status code: {response.status}! {response}", exc_info=exc
+                )
+                raise
+
+    @staticmethod
+    def _clear_attrs(attrs: dict) -> dict:
         for k, v in tuple(attrs.items()):
             if v is None:
                 attrs.pop(k, None)
-
-        if method == "GET":
-            request = self.session.request(method, path, params=attrs)
-        else:
-            request = self.session.request(method, path, json=attrs)
-
-        async with request as response:
-            if response.status != 200:
-                raise HTTPException(await response.text())
-
-            raw_data = await response.json()
-
-        return _Response(**raw_data)
+        return attrs

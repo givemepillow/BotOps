@@ -1,28 +1,51 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Hashable
 from typing import TYPE_CHECKING, Unpack
 
-from botops import core, telegram, utils
+from botops import telegram
+from botops.core.engine import BotEngine
+from botops.triggers import And, Cron, Date, Interval, Or
+from botops.utils import Cleanup, Scheduler
 
 if TYPE_CHECKING:
-    from botops import Dispatcher
+    from .handler import Handler
 
 __all__ = ["Bot"]
 
 
-class Bot(utils.Cleanup):
-    def __init__(self, token: str, dispatcher: Dispatcher):
-        self._engine = core.BotEngine(token)
-        self._dispatcher = dispatcher
+class Bot(Cleanup):
+    def __init__(self, token: str) -> None:
+        self._engine = BotEngine(token)
+        self._scheduler = Scheduler()
 
-    async def run(self) -> None:
-        async for update, done_callback in self._engine.updates:
-            await self._dispatcher.dispatch(self, update, done_callback)
+    def schedule(
+        self,
+        job_id: Hashable,
+        /,
+        job: Callable,
+        trigger: And | Or | Interval | Cron | Date,
+    ) -> None:
+        self.unschedule(job_id)
+        self._scheduler.add_job(job, trigger, id=str(hash(job_id)))
+
+    def unschedule(self, job_id: Hashable, /) -> None:
+        if job := self._scheduler.get_job(str(hash(job_id))):
+            job.remove()
+
+    def register_handler(self, *handlers: type[Handler]) -> None:
+        self._engine.handlers.extend(handler(self) for handler in handlers)
 
     async def _on_startup(self) -> None:
         await self._engine.startup()
 
+        if not self._scheduler.running:
+            self._scheduler.start()
+
     async def _on_shutdown(self) -> None:
+        if self._scheduler.running:
+            self._scheduler.shutdown(wait=True)
+
         await self._engine.shutdown()
 
     async def get_me(self) -> telegram.User:
